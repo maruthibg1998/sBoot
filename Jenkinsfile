@@ -1,28 +1,35 @@
 pipeline {
+    agent any
+    
+    environment {
+        git_branch = 'master'
+        git_url = 'git@github.com:maruthibg1998/sBoot.git'
+    }
 
-	agent any
-	tools {
-		maven 'm360'
-	}
+    stages {
 
-	stages {
-	  stage('build') {
-		steps {
-		  sh 'mvn install -DskipTests'
-		}
-	  }
+        stage('Clone') {
+            steps {
+                git branch: "${git_branch}", url: "${git_url}"
+            }
+        }
 
-	  stage('test') {
-		steps {
-		  sh 'mvn test'
-		  
-		  post {
-				archiveArtifacts artifacts: 'target/**.jar', followSymlinks: false
-				junit stdioRetention: '', testResults: 'target/surefire-reports/*.xml'
-			}
-		}
-	  }
+        stage('Compile') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
 
-}
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
 
+        stage('Build Project') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+    }
 }
